@@ -1,0 +1,11 @@
+# Ambientes virtuais Python
+.venv/
+
+# Arquivos temporários Python
+__pycache__/
+*.pyc
+
+# Cache de testes
+.pytest_cache/
+.coverage
+htmlcov/
