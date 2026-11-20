@@ -1,5 +1,7 @@
-from estatisticas.calculos import calcular_taxa_resolucao
-
+from estatisticas.calculos import (
+    calcular_taxa_resolucao,
+    contar_ocorrencias_por_status,
+)
 
 def test_taxa_resolucao_normal():
     resultado = calcular_taxa_resolucao(20, 5)
@@ -19,3 +21,56 @@ def test_taxa_resolucao_todas_resolvidas():
 def test_taxa_resolucao_nenhuma_resolvida():
     resultado = calcular_taxa_resolucao(10, 0)
     assert resultado == 0.0
+
+
+
+def test_contagem_ocorrencias_por_status():
+    ocorrencias = [
+        {"status": "Aberta"},
+        {"status": "Em análise"},
+        {"status": "Aberta"},
+        {"status": "Resolvida"},
+        {"status": "Aberta"},
+    ]
+
+    resultado = contar_ocorrencias_por_status(ocorrencias)
+
+    assert resultado == {
+        "Aberta": 3,
+        "Em análise": 1,
+        "Resolvida": 1,
+    }
+
+
+def test_contagem_ocorrencias_lista_vazia():
+    resultado = contar_ocorrencias_por_status([])
+
+    assert resultado == {}
+
+
+def test_contagem_ocorrencias_status_unico():
+    ocorrencias = [
+        {"status": "Aberta"},
+        {"status": "Aberta"},
+        {"status": "Aberta"},
+    ]
+
+    resultado = contar_ocorrencias_por_status(ocorrencias)
+
+    assert resultado == {"Aberta": 3}
+
+
+def test_contagem_ocorrencias_status_diferentes():
+    ocorrencias = [
+        {"status": "Aberta"},
+        {"status": "Em análise"},
+        {"status": "Resolvida"},
+    ]
+
+    resultado = contar_ocorrencias_por_status(ocorrencias)
+
+    assert resultado == {
+        "Aberta": 1,
+        "Em análise": 1,
+        "Resolvida": 1,
+    }
