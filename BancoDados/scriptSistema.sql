@@ -11,7 +11,7 @@ SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,N
 -- -----------------------------------------------------
 -- Schema sistemaOcorrencias
 -- -----------------------------------------------------
-CREATE SCHEMA IF NOT EXISTS `sistemaOcorrencias` DEFAULT CHARACTER SET utf8 ;
+CREATE SCHEMA IF NOT EXISTS `sistemaOcorrencias` ;
 USE `sistemaOcorrencias` ;
 
 -- -----------------------------------------------------
@@ -32,39 +32,11 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `sistemaOcorrencias`.`Local` (
   `codigo` INT NOT NULL,
-  `endereco` VARCHAR(150) NULL,
+  `endereco` VARCHAR(255) NULL,
   `latitude` VARCHAR(45) NULL,
   `longitude` VARCHAR(45) NULL,
   `imagem` LONGBLOB NULL,
   PRIMARY KEY (`codigo`))
-ENGINE = InnoDB;
-
-
--- -----------------------------------------------------
--- Table `sistemaOcorrencias`.`Ocorrencia`
--- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `sistemaOcorrencias`.`Ocorrencia` (
-  `idOcorrencia` INT NOT NULL,
-  `tipo` VARCHAR(45) NULL,
-  `descricao` VARCHAR(255) NULL,
-  `data` DATE NULL,
-  `hora` DATETIME NULL,
-  `status` VARCHAR(45) NULL,
-  `Usuario_CPF` VARCHAR(11) NOT NULL,
-  `Local_codigo` INT NOT NULL,
-  PRIMARY KEY (`idOcorrencia`),
-  INDEX `fk_Ocorrencia_Usuario_idx` (`Usuario_CPF` ASC) VISIBLE,
-  INDEX `fk_Ocorrencia_Local1_idx` (`Local_codigo` ASC) VISIBLE,
-  CONSTRAINT `fk_Ocorrencia_Usuario`
-    FOREIGN KEY (`Usuario_CPF`)
-    REFERENCES `sistemaOcorrencias`.`Usuario` (`CPF`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
-  CONSTRAINT `fk_Ocorrencia_Local1`
-    FOREIGN KEY (`Local_codigo`)
-    REFERENCES `sistemaOcorrencias`.`Local` (`codigo`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 
 
@@ -81,6 +53,41 @@ CREATE TABLE IF NOT EXISTS `sistemaOcorrencias`.`tipoOcorrencia` (
   CONSTRAINT `fk_tipoOcorrencia_Local1`
     FOREIGN KEY (`Local_codigo`)
     REFERENCES `sistemaOcorrencias`.`Local` (`codigo`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `sistemaOcorrencias`.`Ocorrencia`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `sistemaOcorrencias`.`Ocorrencia` (
+  `idOcorrencia` INT NOT NULL,
+  `tipo` VARCHAR(45) NULL,
+  `descricao` VARCHAR(255) NULL,
+  `data` DATE NULL,
+  `hora` DATETIME NULL,
+  `status` VARCHAR(45) NULL,
+  `Usuario_CPF` VARCHAR(11) NOT NULL,
+  `Local_codigo` INT NOT NULL,
+  `tipoOcorrencia_idtipoOcorrencia` INT NOT NULL,
+  PRIMARY KEY (`idOcorrencia`, `tipoOcorrencia_idtipoOcorrencia`),
+  INDEX `fk_Ocorrencia_Usuario_idx` (`Usuario_CPF` ASC) VISIBLE,
+  INDEX `fk_Ocorrencia_Local1_idx` (`Local_codigo` ASC) VISIBLE,
+  INDEX `fk_Ocorrencia_tipoOcorrencia1_idx` (`tipoOcorrencia_idtipoOcorrencia` ASC) VISIBLE,
+  CONSTRAINT `fk_Ocorrencia_Usuario`
+    FOREIGN KEY (`Usuario_CPF`)
+    REFERENCES `sistemaOcorrencias`.`Usuario` (`CPF`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_Ocorrencia_Local1`
+    FOREIGN KEY (`Local_codigo`)
+    REFERENCES `sistemaOcorrencias`.`Local` (`codigo`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_Ocorrencia_tipoOcorrencia1`
+    FOREIGN KEY (`tipoOcorrencia_idtipoOcorrencia`)
+    REFERENCES `sistemaOcorrencias`.`tipoOcorrencia` (`idtipoOcorrencia`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
