@@ -2,7 +2,10 @@ from estatisticas.calculos import (
     calcular_taxa_resolucao,
     contar_ocorrencias_por_status,
     contar_ocorrencias_por_tipo,
+    contar_ocorrencias_por_dia,
+    contar_ocorrencias_por_mes,
 )
+
 
 def test_taxa_resolucao_normal():
     resultado = calcular_taxa_resolucao(20, 5)
@@ -127,3 +130,81 @@ def test_contagem_tipos_diferentes():
         "Iluminação pública": 1,
         "Descarte irregular": 1,
     }
+
+
+def test_contagem_ocorrencias_por_dia():
+    ocorrencias = [
+        {"data": "2026-11-01"},
+        {"data": "2026-11-01"},
+        {"data": "2026-11-02"},
+        {"data": "2026-11-03"},
+        {"data": "2026-11-03"},
+    ]
+
+    resultado = contar_ocorrencias_por_dia(ocorrencias)
+
+    assert resultado == {
+        "2026-11-01": 2,
+        "2026-11-02": 1,
+        "2026-11-03": 2,
+    }
+
+
+def test_contagem_dia_lista_vazia():
+    resultado = contar_ocorrencias_por_dia([])
+
+    assert resultado == {}
+
+
+def test_contagem_dia_ordenacao():
+    ocorrencias = [
+        {"data": "2026-11-03"},
+        {"data": "2026-11-01"},
+        {"data": "2026-11-02"},
+    ]
+
+    resultado = contar_ocorrencias_por_dia(ocorrencias)
+
+    assert list(resultado.keys()) == [
+        "2026-11-01",
+        "2026-11-02",
+        "2026-11-03",
+    ]
+
+
+def test_contagem_ocorrencias_por_mes():
+    ocorrencias = [
+        {"data": "2026-10-01"},
+        {"data": "2026-10-15"},
+        {"data": "2026-11-01"},
+        {"data": "2026-11-03"},
+        {"data": "2026-11-05"},
+    ]
+
+    resultado = contar_ocorrencias_por_mes(ocorrencias)
+
+    assert resultado == {
+        "2026-10": 2,
+        "2026-11": 3,
+    }
+
+
+def test_contagem_mes_anos_diferentes():
+    ocorrencias = [
+        {"data": "2025-11-01"},
+        {"data": "2026-11-01"},
+        {"data": "2026-11-02"},
+    ]
+
+    resultado = contar_ocorrencias_por_mes(ocorrencias)
+
+    assert resultado == {
+        "2025-11": 1,
+        "2026-11": 2,
+    }
+
+
+def test_contagem_mes_lista_vazia():
+    resultado = contar_ocorrencias_por_mes([])
+
+    assert resultado == {}
