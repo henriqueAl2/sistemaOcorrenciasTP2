@@ -1,6 +1,7 @@
 from estatisticas.calculos import (
     calcular_taxa_resolucao,
     contar_ocorrencias_por_status,
+    contar_ocorrencias_por_tipo,
 )
 
 def test_taxa_resolucao_normal():
@@ -73,4 +74,56 @@ def test_contagem_ocorrencias_status_diferentes():
         "Aberta": 1,
         "Em análise": 1,
         "Resolvida": 1,
+    }
+
+
+def test_contagem_ocorrencias_por_tipo():
+    ocorrencias = [
+        {"tipo": "Buraco na via"},
+        {"tipo": "Iluminação pública"},
+        {"tipo": "Buraco na via"},
+        {"tipo": "Descarte irregular"},
+        {"tipo": "Buraco na via"},
+    ]
+
+    resultado = contar_ocorrencias_por_tipo(ocorrencias)
+
+    assert resultado == {
+        "Buraco na via": 3,
+        "Iluminação pública": 1,
+        "Descarte irregular": 1,
+    }
+
+
+def test_contagem_tipo_lista_vazia():
+    resultado = contar_ocorrencias_por_tipo([])
+
+    assert resultado == {}
+
+
+def test_contagem_tipo_unico():
+    ocorrencias = [
+        {"tipo": "Buraco na via"},
+        {"tipo": "Buraco na via"},
+        {"tipo": "Buraco na via"},
+    ]
+
+    resultado = contar_ocorrencias_por_tipo(ocorrencias)
+
+    assert resultado == {"Buraco na via": 3}
+
+
+def test_contagem_tipos_diferentes():
+    ocorrencias = [
+        {"tipo": "Buraco na via"},
+        {"tipo": "Iluminação pública"},
+        {"tipo": "Descarte irregular"},
+    ]
+
+    resultado = contar_ocorrencias_por_tipo(ocorrencias)
+
+    assert resultado == {
+        "Buraco na via": 1,
+        "Iluminação pública": 1,
+        "Descarte irregular": 1,
     }
