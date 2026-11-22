@@ -1,0 +1,46 @@
+"""Módulo de Definição: Especificação externa dos domínios do sistema."""
+
+
+class CPF:
+    valor: str
+    def __init__(self, valor: str) -> None: ...
+    def __str__(self) -> str: ...
+
+class Senha:
+    valor: str
+    def __init__(self, valor: str) -> None: ...
+    def __str__(self) -> str: ...
+
+class Email:
+    valor: str
+    def __init__ (self, valor: str) -> None: ...
+    def __str__(self) -> str: ...
+
+class TipoUsuario:
+    valor: str
+    def __init__ (self, valor: str) -> None: ...
+    def __str__(self) -> str: ...
+
+class TipoNotificacao:
+    valor: str
+    def __init__(self, valor: str) -> None: ...
+    def __str__(self) -> str: ...
+
+class Texto:
+    TAMANHO_MAXIMO: int 
+    valor: str
+    def __init__(self, valor: str) -> None: ...
+    def __str__(self) -> str: ...
+
+class TextoCurto(Texto):
+    TAMANHO_MAXIMO = 45
+
+class TextoLongo(Texto):
+    TAMANHO_MAXIMO = 255
+
+class Data:
+    valor: str
+
+    def __init__(self, valor: str) -> None: ...
+    def __str__(self) -> str: ...
+
