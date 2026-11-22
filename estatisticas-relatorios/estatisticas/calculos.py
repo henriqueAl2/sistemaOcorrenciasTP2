@@ -2,11 +2,11 @@ def calcular_taxa_resolucao(total, resolvidas):
     """
     Calcula o percentual de ocorrencias resolvidas.
 
-    Argumentos:
+    Args:
         total: Quantidade total de ocorrencias.
         resolvidas: Quantidade de ocorrencias resolvidas.
 
-    Retorna:
+    Returns:
         Percentual de ocorrencias resolvidas.
     """
     if total == 0:
@@ -15,51 +15,39 @@ def calcular_taxa_resolucao(total, resolvidas):
     return (resolvidas / total) * 100
 
 
-def contar_ocorrencias_por_status(ocorrencias):
+def _contar_por_campo(ocorrencias, campo):
     """
-    Conta a quantidade de ocorrencias por status.
+    Conta registros agrupados pelo campo informado.
 
-    Argumentos:
-        ocorrencias: Lista de dicionarios contendo
-                     o campo 'status'.
+    Args:
+        ocorrencias: Lista de dicionarios.
+        campo: Nome do campo utilizado no agrupamento.
 
-    Retorna:
-        Dicionario com a quantidade de ocorrencias
-        para cada status encontrado.
+    Returns:
+        Dicionario com a contagem de cada valor.
     """
     contagem = {}
 
     for ocorrencia in ocorrencias:
-        status = ocorrencia["status"]
+        valor = ocorrencia[campo]
 
-        if status not in contagem:
-            contagem[status] = 0
+        if valor not in contagem:
+            contagem[valor] = 0
 
-        contagem[status] += 1
+        contagem[valor] += 1
 
     return contagem
+
+
+def contar_ocorrencias_por_status(ocorrencias):
+    """
+    Conta a quantidade de ocorrencias por status.
+    """
+    return _contar_por_campo(ocorrencias, "status")
 
 
 def contar_ocorrencias_por_tipo(ocorrencias):
     """
     Conta a quantidade de ocorrencias por tipo.
-
-    Argumentos:
-        ocorrencias: Lista de dicionarios contendo
-                     o campo 'tipo'.
-
-    Retorna:
-        Dicionario com a quantidade de ocorrencias
-        para cada tipo encontrado.
     """
-    contagem = {}
-
-    for ocorrencia in ocorrencias:
-        tipo = ocorrencia["tipo"]
-
-        if tipo not in contagem:
-            contagem[tipo] = 0
-
-        contagem[tipo] += 1
-
-    return contagem
+    return _contar_por_campo(ocorrencias, "tipo")
