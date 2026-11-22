@@ -38,3 +38,28 @@ def contar_ocorrencias_por_status(ocorrencias):
         contagem[status] += 1
 
     return contagem
+
+
+def contar_ocorrencias_por_tipo(ocorrencias):
+    """
+    Conta a quantidade de ocorrencias por tipo.
+
+    Argumentos:
+        ocorrencias: Lista de dicionarios contendo
+                     o campo 'tipo'.
+
+    Retorna:
+        Dicionario com a quantidade de ocorrencias
+        para cada tipo encontrado.
+    """
+    contagem = {}
+
+    for ocorrencia in ocorrencias:
+        tipo = ocorrencia["tipo"]
+
+        if tipo not in contagem:
+            contagem[tipo] = 0
+
+        contagem[tipo] += 1
+
+    return contagem
