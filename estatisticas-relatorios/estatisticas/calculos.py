@@ -1,3 +1,6 @@
+
+"""CÁLCULOS SOBRE OCORRÊNCIAS"""
+
 def calcular_taxa_resolucao(total, resolvidas):
     """
     Calcula o percentual de ocorrencias resolvidas.
@@ -51,3 +54,56 @@ def contar_ocorrencias_por_tipo(ocorrencias):
     Conta a quantidade de ocorrencias por tipo.
     """
     return _contar_por_campo(ocorrencias, "tipo")
+
+
+
+""" EVOLUÇÃO TEMPORAL DAS OCORRÊNCIAS """
+
+def contar_ocorrencias_por_dia(ocorrencias):
+    """
+    Conta ocorrencias agrupadas pela data de registro.
+
+    Args:
+        ocorrencias: Lista de dicionarios com o campo
+                     'data' no formato AAAA-MM-DD.
+
+    Returns:
+        Dicionario ordenado cronologicamente com
+        a quantidade de ocorrencias por dia.
+    """
+    contagem = {}
+
+    for ocorrencia in ocorrencias:
+        data = ocorrencia["data"]
+
+        if data not in contagem:
+            contagem[data] = 0
+
+        contagem[data] += 1
+
+    return dict(sorted(contagem.items()))
+
+
+def contar_ocorrencias_por_mes(ocorrencias):
+    """
+    Conta ocorrencias agrupadas por ano e mes.
+
+    Args:
+        ocorrencias: Lista de dicionarios com o campo
+                     'data' no formato AAAA-MM-DD.
+
+    Returns:
+        Dicionario ordenado cronologicamente com
+        a quantidade de ocorrencias por mes.
+    """
+    contagem = {}
+
+    for ocorrencia in ocorrencias:
+        mes = ocorrencia["data"][:7]
+
+        if mes not in contagem:
+            contagem[mes] = 0
+
+        contagem[mes] += 1
+
+    return dict(sorted(contagem.items()))
