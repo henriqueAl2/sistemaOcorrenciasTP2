@@ -82,3 +82,21 @@ def contar_ocorrencias_por_mes(ocorrencias):
     )
 
     return dict(sorted(contagem.items()))
+
+
+def contar_ocorrencias_por_regiao(ocorrencias):
+    """
+    Conta a quantidade de ocorrencias por regiao.
+
+    Args:
+        ocorrencias: Lista de dicionarios contendo
+                     o campo 'regiao'.
+
+    Returns:
+        Dicionario com a quantidade de ocorrencias
+        para cada regiao encontrada.
+    """
+    return _contar_por_chave(
+        ocorrencias,
+        lambda ocorrencia: ocorrencia["regiao"]
+    )
