@@ -100,3 +100,32 @@ def contar_ocorrencias_por_regiao(ocorrencias):
         ocorrencias,
         lambda ocorrencia: ocorrencia["regiao"]
     )
+
+
+def gerar_indicadores_gerais(ocorrencias):
+    """
+    Gera indicadores gerais das ocorrencias.
+
+    Args:
+        ocorrencias: Lista de dicionarios contendo
+                     o campo 'status'.
+
+    Returns:
+        Dicionario contendo total, distribuicao
+        por status, quantidade resolvida e
+        taxa de resolucao.
+    """
+    total = len(ocorrencias)
+
+    por_status = contar_ocorrencias_por_status(ocorrencias)
+
+    resolvidas = por_status.get("Resolvida", 0)
+
+    taxa = calcular_taxa_resolucao(total, resolvidas)
+
+    return {
+        "total": total,
+        "por_status": por_status,
+        "resolvidas": resolvidas,
+        "taxa_resolucao": taxa,
+    }
