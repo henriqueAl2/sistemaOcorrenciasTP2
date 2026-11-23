@@ -4,8 +4,8 @@ from estatisticas.calculos import (
     contar_ocorrencias_por_tipo,
     contar_ocorrencias_por_dia,
     contar_ocorrencias_por_mes,
+    contar_ocorrencias_por_regiao,
 )
-
 
 def test_taxa_resolucao_normal():
     resultado = calcular_taxa_resolucao(20, 5)
@@ -208,3 +208,55 @@ def test_contagem_mes_lista_vazia():
     resultado = contar_ocorrencias_por_mes([])
 
     assert resultado == {}
+
+
+def test_contagem_ocorrencias_por_regiao():
+    ocorrencias = [
+        {"regiao": "Asa Norte"},
+        {"regiao": "Asa Sul"},
+        {"regiao": "Asa Norte"},
+        {"regiao": "Taguatinga"},
+        {"regiao": "Asa Norte"},
+    ]
+
+    resultado = contar_ocorrencias_por_regiao(ocorrencias)
+
+    assert resultado == {
+        "Asa Norte": 3,
+        "Asa Sul": 1,
+        "Taguatinga": 1,
+    }
+
+
+def test_contagem_regiao_lista_vazia():
+    resultado = contar_ocorrencias_por_regiao([])
+
+    assert resultado == {}
+
+
+def test_contagem_regiao_unica():
+    ocorrencias = [
+        {"regiao": "Asa Norte"},
+        {"regiao": "Asa Norte"},
+        {"regiao": "Asa Norte"},
+    ]
+
+    resultado = contar_ocorrencias_por_regiao(ocorrencias)
+
+    assert resultado == {"Asa Norte": 3}
+
+
+def test_contagem_regioes_diferentes():
+    ocorrencias = [
+        {"regiao": "Asa Norte"},
+        {"regiao": "Asa Sul"},
+        {"regiao": "Taguatinga"},
+    ]
+
+    resultado = contar_ocorrencias_por_regiao(ocorrencias)
+
+    assert resultado == {
+        "Asa Norte": 1,
+        "Asa Sul": 1,
+        "Taguatinga": 1,
+    }
