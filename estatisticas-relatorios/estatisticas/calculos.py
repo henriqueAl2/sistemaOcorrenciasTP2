@@ -1,6 +1,4 @@
 
-"""CÁLCULOS SOBRE OCORRÊNCIAS"""
-
 def calcular_taxa_resolucao(total, resolvidas):
     """
     Calcula o percentual de ocorrencias resolvidas.
@@ -18,26 +16,26 @@ def calcular_taxa_resolucao(total, resolvidas):
     return (resolvidas / total) * 100
 
 
-def _contar_por_campo(ocorrencias, campo):
+def _contar_por_chave(ocorrencias, obter_chave):
     """
-    Conta registros agrupados pelo campo informado.
+    Conta registros agrupados por uma chave.
 
     Args:
         ocorrencias: Lista de dicionarios.
-        campo: Nome do campo utilizado no agrupamento.
+        obter_chave: Funcao que extrai a chave de agrupamento.
 
     Returns:
-        Dicionario com a contagem de cada valor.
+        Dicionario com as quantidades por chave.
     """
     contagem = {}
 
     for ocorrencia in ocorrencias:
-        valor = ocorrencia[campo]
+        chave = obter_chave(ocorrencia)
 
-        if valor not in contagem:
-            contagem[valor] = 0
+        if chave not in contagem:
+            contagem[chave] = 0
 
-        contagem[valor] += 1
+        contagem[chave] += 1
 
     return contagem
 
@@ -46,64 +44,41 @@ def contar_ocorrencias_por_status(ocorrencias):
     """
     Conta a quantidade de ocorrencias por status.
     """
-    return _contar_por_campo(ocorrencias, "status")
+    return _contar_por_chave(
+        ocorrencias,
+        lambda ocorrencia: ocorrencia["status"]
+    )
 
 
 def contar_ocorrencias_por_tipo(ocorrencias):
     """
     Conta a quantidade de ocorrencias por tipo.
     """
-    return _contar_por_campo(ocorrencias, "tipo")
+    return _contar_por_chave(
+        ocorrencias,
+        lambda ocorrencia: ocorrencia["tipo"]
+    )
 
-
-
-""" EVOLUÇÃO TEMPORAL DAS OCORRÊNCIAS """
 
 def contar_ocorrencias_por_dia(ocorrencias):
     """
-    Conta ocorrencias agrupadas pela data de registro.
-
-    Args:
-        ocorrencias: Lista de dicionarios com o campo
-                     'data' no formato AAAA-MM-DD.
-
-    Returns:
-        Dicionario ordenado cronologicamente com
-        a quantidade de ocorrencias por dia.
+    Conta ocorrencias por dia, em ordem cronologica.
     """
-    contagem = {}
-
-    for ocorrencia in ocorrencias:
-        data = ocorrencia["data"]
-
-        if data not in contagem:
-            contagem[data] = 0
-
-        contagem[data] += 1
+    contagem = _contar_por_chave(
+        ocorrencias,
+        lambda ocorrencia: ocorrencia["data"]
+    )
 
     return dict(sorted(contagem.items()))
 
 
 def contar_ocorrencias_por_mes(ocorrencias):
     """
-    Conta ocorrencias agrupadas por ano e mes.
-
-    Args:
-        ocorrencias: Lista de dicionarios com o campo
-                     'data' no formato AAAA-MM-DD.
-
-    Returns:
-        Dicionario ordenado cronologicamente com
-        a quantidade de ocorrencias por mes.
+    Conta ocorrencias por ano e mes, em ordem cronologica.
     """
-    contagem = {}
-
-    for ocorrencia in ocorrencias:
-        mes = ocorrencia["data"][:7]
-
-        if mes not in contagem:
-            contagem[mes] = 0
-
-        contagem[mes] += 1
+    contagem = _contar_por_chave(
+        ocorrencias,
+        lambda ocorrencia: ocorrencia["data"][:7]
+    )
 
     return dict(sorted(contagem.items()))
