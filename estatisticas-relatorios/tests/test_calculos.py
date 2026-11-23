@@ -5,6 +5,7 @@ from estatisticas.calculos import (
     contar_ocorrencias_por_dia,
     contar_ocorrencias_por_mes,
     contar_ocorrencias_por_regiao,
+    gerar_indicadores_gerais,
 )
 
 def test_taxa_resolucao_normal():
@@ -260,3 +261,62 @@ def test_contagem_regioes_diferentes():
         "Asa Sul": 1,
         "Taguatinga": 1,
     }
+
+
+def test_indicadores_gerais():
+    ocorrencias = [
+        {"status": "Aberta"},
+        {"status": "Resolvida"},
+        {"status": "Aberta"},
+        {"status": "Em análise"},
+        {"status": "Resolvida"},
+    ]
+
+    resultado = gerar_indicadores_gerais(ocorrencias)
+
+    assert resultado == {
+        "total": 5,
+        "por_status": {
+            "Aberta": 2,
+            "Resolvida": 2,
+            "Em análise": 1,
+        },
+        "resolvidas": 2,
+        "taxa_resolucao": 40.0,
+    }
+
+
+def test_indicadores_lista_vazia():
+    resultado = gerar_indicadores_gerais([])
+
+    assert resultado == {
+        "total": 0,
+        "por_status": {},
+        "resolvidas": 0,
+        "taxa_resolucao": 0.0,
+    }
+
+
+def test_indicadores_todas_resolvidas():
+    ocorrencias = [
+        {"status": "Resolvida"},
+        {"status": "Resolvida"},
+    ]
+
+    resultado = gerar_indicadores_gerais(ocorrencias)
+
+    assert resultado["total"] == 2
+    assert resultado["resolvidas"] == 2
+    assert resultado["taxa_resolucao"] == 100.0
+
+
+def test_indicadores_nenhuma_resolvida():
+    ocorrencias = [
+        {"status": "Aberta"},
+        {"status": "Em análise"},
+    ]
+
+    resultado = gerar_indicadores_gerais(ocorrencias)
+
+    assert resultado["resolvidas"] == 0
+    assert resultado["taxa_resolucao"] == 0.0
