@@ -9,7 +9,27 @@ def calcular_taxa_resolucao(total, resolvidas):
 
     Returns:
         Percentual de ocorrencias resolvidas.
+
+    Raises:
+        TypeError: Se os argumentos nao forem inteiros.
+        ValueError: Se as quantidades forem invalidas.
     """
+
+    if type(total) is not int or type(resolvidas) is not int:
+        raise TypeError(
+            "Total e resolvidas devem ser numeros inteiros."
+        )
+
+    if total < 0 or resolvidas < 0:
+        raise ValueError(
+            "As quantidades nao podem ser negativas."
+        )
+
+    if resolvidas > total:
+        raise ValueError(
+            "Resolvidas nao pode ser maior que o total."
+        )
+
     if total == 0:
         return 0.0
 
@@ -204,3 +224,7 @@ def contar_pesquisas_por_regiao(pesquisas):
         pesquisas,
         lambda pesquisa: pesquisa["regiao"]
     )
+
+
+
+
