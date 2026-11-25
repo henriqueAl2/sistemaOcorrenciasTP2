@@ -6,6 +6,8 @@ from estatisticas.calculos import (
     contar_ocorrencias_por_mes,
     contar_ocorrencias_por_regiao,
     gerar_indicadores_gerais,
+    contar_usuarios_por_perfil,
+    contar_usuarios_com_ocorrencias,
 )
 
 def test_taxa_resolucao_normal():
@@ -320,3 +322,68 @@ def test_indicadores_nenhuma_resolvida():
 
     assert resultado["resolvidas"] == 0
     assert resultado["taxa_resolucao"] == 0.0
+
+
+
+def test_contagem_usuarios_por_perfil():
+    usuarios = [
+        {"id": 1, "perfil": "admin"},
+        {"id": 2, "perfil": "comum"},
+        {"id": 3, "perfil": "comum"},
+    ]
+
+    resultado = contar_usuarios_por_perfil(usuarios)
+
+    assert resultado == {
+        "admin": 1,
+        "comum": 2,
+    }
+
+
+def test_contagem_usuarios_lista_vazia():
+    resultado = contar_usuarios_por_perfil([])
+
+    assert resultado == {}
+
+
+def test_contagem_usuarios_perfil_unico():
+    usuarios = [
+        {"id": 1, "perfil": "comum"},
+        {"id": 2, "perfil": "comum"},
+    ]
+
+    resultado = contar_usuarios_por_perfil(usuarios)
+
+    assert resultado == {"comum": 2}
+
+
+def test_usuarios_distintos_com_ocorrencias():
+    ocorrencias = [
+        {"usuario_id": 2},
+        {"usuario_id": 2},
+        {"usuario_id": 3},
+        {"usuario_id": 3},
+        {"usuario_id": 4},
+    ]
+
+    resultado = contar_usuarios_com_ocorrencias(ocorrencias)
+
+    assert resultado == 3
+
+
+def test_usuarios_com_ocorrencias_lista_vazia():
+    resultado = contar_usuarios_com_ocorrencias([])
+
+    assert resultado == 0
+
+
+def test_usuarios_com_ocorrencias_usuario_unico():
+    ocorrencias = [
+        {"usuario_id": 5},
+        {"usuario_id": 5},
+        {"usuario_id": 5},
+    ]
+
+    resultado = contar_usuarios_com_ocorrencias(ocorrencias)
+
+    assert resultado == 1
