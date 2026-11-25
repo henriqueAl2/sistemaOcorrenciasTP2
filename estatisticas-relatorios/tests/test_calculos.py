@@ -1,3 +1,4 @@
+import pytest
 from estatisticas.calculos import (
     calcular_taxa_resolucao,
     contar_ocorrencias_por_status,
@@ -460,4 +461,36 @@ def test_pesquisas_por_regiao_unica():
     resultado = contar_pesquisas_por_regiao(pesquisas)
 
     assert resultado == {"Asa Sul": 3}
+
+
+
+# VALIDACAO DA TAXA DE RESOLUCAO
+
+@pytest.mark.parametrize(
+    "total, resolvidas",
+    [
+        (-10, 5),
+        (10, -2),
+        (10, 15),
+        (0, 1),
+    ],
+)
+def test_taxa_resolucao_valores_invalidos(total, resolvidas):
+    with pytest.raises(ValueError):
+        calcular_taxa_resolucao(total, resolvidas)
+
+
+@pytest.mark.parametrize(
+    "total, resolvidas",
+    [
+        ("dez", 5),
+        (10, None),
+        (10.5, 5),
+        (True, 1),
+        (10, "cinco"),
+    ],
+)
+def test_taxa_resolucao_tipos_invalidos(total, resolvidas):
+    with pytest.raises(TypeError):
+        calcular_taxa_resolucao(total, resolvidas)
 
