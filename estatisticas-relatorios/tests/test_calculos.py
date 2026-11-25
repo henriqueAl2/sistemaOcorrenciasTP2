@@ -494,3 +494,98 @@ def test_taxa_resolucao_tipos_invalidos(total, resolvidas):
     with pytest.raises(TypeError):
         calcular_taxa_resolucao(total, resolvidas)
 
+
+
+# VALIDACAO DAS FUNCOES DE AGRUPAMENTO
+
+@pytest.mark.parametrize(
+    "funcao, campo",
+    [
+        (contar_ocorrencias_por_status, "status"),
+        (contar_ocorrencias_por_tipo, "tipo"),
+        (contar_ocorrencias_por_regiao, "regiao"),
+        (contar_usuarios_por_perfil, "perfil"),
+        (contar_pesquisas_por_termo, "termo"),
+        (contar_pesquisas_por_regiao, "regiao"),
+    ],
+)
+def test_agrupamento_campo_ausente(funcao, campo):
+    registros = [{campo: "Valor valido"}, {}]
+
+    with pytest.raises(ValueError):
+        funcao(registros)
+
+
+@pytest.mark.parametrize(
+    "funcao, campo",
+    [
+        (contar_ocorrencias_por_status, "status"),
+        (contar_ocorrencias_por_tipo, "tipo"),
+        (contar_ocorrencias_por_regiao, "regiao"),
+        (contar_usuarios_por_perfil, "perfil"),
+        (contar_pesquisas_por_termo, "termo"),
+        (contar_pesquisas_por_regiao, "regiao"),
+    ],
+)
+def test_agrupamento_valor_nulo(funcao, campo):
+    registros = [{campo: None}]
+
+    with pytest.raises(ValueError):
+        funcao(registros)
+
+
+@pytest.mark.parametrize(
+    "funcao, campo",
+    [
+        (contar_ocorrencias_por_status, "status"),
+        (contar_ocorrencias_por_tipo, "tipo"),
+        (contar_ocorrencias_por_regiao, "regiao"),
+        (contar_usuarios_por_perfil, "perfil"),
+        (contar_pesquisas_por_termo, "termo"),
+        (contar_pesquisas_por_regiao, "regiao"),
+    ],
+)
+def test_agrupamento_valor_vazio(funcao, campo):
+    registros = [{campo: "   "}]
+
+    with pytest.raises(ValueError):
+        funcao(registros)
+
+
+@pytest.mark.parametrize(
+    "funcao, campo",
+    [
+        (contar_ocorrencias_por_status, "status"),
+        (contar_ocorrencias_por_tipo, "tipo"),
+        (contar_ocorrencias_por_regiao, "regiao"),
+        (contar_usuarios_por_perfil, "perfil"),
+        (contar_pesquisas_por_termo, "termo"),
+        (contar_pesquisas_por_regiao, "regiao"),
+    ],
+)
+def test_agrupamento_tipo_invalido(funcao, campo):
+    registros = [{campo: 123}]
+
+    with pytest.raises(TypeError):
+        funcao(registros)
+
+
+
+@pytest.mark.parametrize(
+    "entrada",
+    [None, "texto", 123],
+)
+def test_agrupamento_entrada_nao_lista(entrada):
+    with pytest.raises(TypeError):
+        contar_ocorrencias_por_status(entrada)
+
+
+def test_agrupamento_registro_nao_dicionario():
+    ocorrencias = [
+        {"status": "Aberta"},
+        "registro incorreto",
+    ]
+
+    with pytest.raises(TypeError):
+        contar_ocorrencias_por_status(ocorrencias)
+
