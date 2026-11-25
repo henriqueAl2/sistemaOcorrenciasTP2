@@ -8,6 +8,8 @@ from estatisticas.calculos import (
     gerar_indicadores_gerais,
     contar_usuarios_por_perfil,
     contar_usuarios_com_ocorrencias,
+    contar_pesquisas_por_termo,
+    contar_pesquisas_por_regiao,
 )
 
 def test_taxa_resolucao_normal():
@@ -387,3 +389,75 @@ def test_usuarios_com_ocorrencias_usuario_unico():
     resultado = contar_usuarios_com_ocorrencias(ocorrencias)
 
     assert resultado == 1
+
+
+
+def test_pesquisas_por_termo():
+    pesquisas = [
+        {"termo": "Buraco na via"},
+        {"termo": "Iluminação"},
+        {"termo": "Buraco na via"},
+        {"termo": "Descarte irregular"},
+        {"termo": "Buraco na via"},
+    ]
+
+    resultado = contar_pesquisas_por_termo(pesquisas)
+
+    assert resultado == {
+        "Buraco na via": 3,
+        "Iluminação": 1,
+        "Descarte irregular": 1,
+    }
+
+
+def test_pesquisas_por_termo_lista_vazia():
+    resultado = contar_pesquisas_por_termo([])
+
+    assert resultado == {}
+
+
+def test_pesquisas_por_termo_unico():
+    pesquisas = [
+        {"termo": "Iluminação"},
+        {"termo": "Iluminação"},
+    ]
+
+    resultado = contar_pesquisas_por_termo(pesquisas)
+
+    assert resultado == {"Iluminação": 2}
+
+
+def test_pesquisas_por_regiao():
+    pesquisas = [
+        {"regiao": "Asa Norte"},
+        {"regiao": "Asa Sul"},
+        {"regiao": "Asa Norte"},
+        {"regiao": "Taguatinga"},
+    ]
+
+    resultado = contar_pesquisas_por_regiao(pesquisas)
+
+    assert resultado == {
+        "Asa Norte": 2,
+        "Asa Sul": 1,
+        "Taguatinga": 1,
+    }
+
+
+def test_pesquisas_por_regiao_lista_vazia():
+    resultado = contar_pesquisas_por_regiao([])
+
+    assert resultado == {}
+
+
+def test_pesquisas_por_regiao_unica():
+    pesquisas = [
+        {"regiao": "Asa Sul"},
+        {"regiao": "Asa Sul"},
+        {"regiao": "Asa Sul"},
+    ]
+
+    resultado = contar_pesquisas_por_regiao(pesquisas)
+
+    assert resultado == {"Asa Sul": 3}
+
