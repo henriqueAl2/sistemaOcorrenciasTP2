@@ -36,6 +36,7 @@ def calcular_taxa_resolucao(total, resolvidas):
     return (resolvidas / total) * 100
 
 
+
 def _contar_por_chave(ocorrencias, obter_chave):
     """
     Conta registros agrupados por uma chave.
@@ -46,11 +47,47 @@ def _contar_por_chave(ocorrencias, obter_chave):
 
     Returns:
         Dicionario com as quantidades por chave.
+
+    Raises:
+        TypeError: Se a estrutura ou o tipo de um valor
+                   estiver incorreto.
+        ValueError: Se um campo estiver ausente, nulo
+                    ou vazio.
     """
+    if not isinstance(ocorrencias, list):
+        raise TypeError(
+            "Os registros devem ser fornecidos em uma lista."
+        )
+
     contagem = {}
 
     for ocorrencia in ocorrencias:
-        chave = obter_chave(ocorrencia)
+        if not isinstance(ocorrencia, dict):
+            raise TypeError(
+                "Cada registro deve ser um dicionario."
+            )
+
+        try:
+            chave = obter_chave(ocorrencia)
+        except KeyError as erro:
+            raise ValueError(
+                "Registro com campo obrigatorio ausente."
+            ) from erro
+
+        if chave is None:
+            raise ValueError(
+                "O valor do campo nao pode ser nulo."
+            )
+
+        if not isinstance(chave, str):
+            raise TypeError(
+                "O valor do campo deve ser uma string."
+            )
+
+        if not chave.strip():
+            raise ValueError(
+                "O valor do campo nao pode estar vazio."
+            )
 
         if chave not in contagem:
             contagem[chave] = 0
@@ -58,6 +95,7 @@ def _contar_por_chave(ocorrencias, obter_chave):
         contagem[chave] += 1
 
     return contagem
+
 
 
 def contar_ocorrencias_por_status(ocorrencias):
@@ -224,6 +262,7 @@ def contar_pesquisas_por_regiao(pesquisas):
         pesquisas,
         lambda pesquisa: pesquisa["regiao"]
     )
+
 
 
 
