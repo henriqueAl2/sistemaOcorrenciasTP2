@@ -167,3 +167,40 @@ def contar_usuarios_com_ocorrencias(ocorrencias):
         usuarios_distintos.add(ocorrencia["usuario_id"])
 
     return len(usuarios_distintos)
+
+
+
+def contar_pesquisas_por_termo(pesquisas):
+    """
+    Conta a quantidade de pesquisas por termo.
+
+    Args:
+        pesquisas: Lista de dicionarios contendo
+                   o campo 'termo'.
+
+    Returns:
+        Dicionario com a quantidade de pesquisas
+        para cada termo encontrado.
+    """
+    return _contar_por_chave(
+        pesquisas,
+        lambda pesquisa: pesquisa["termo"]
+    )
+
+
+def contar_pesquisas_por_regiao(pesquisas):
+    """
+    Conta a quantidade de pesquisas por regiao.
+
+    Args:
+        pesquisas: Lista de dicionarios contendo
+                   o campo 'regiao'.
+
+    Returns:
+        Dicionario com a quantidade de pesquisas
+        para cada regiao consultada.
+    """
+    return _contar_por_chave(
+        pesquisas,
+        lambda pesquisa: pesquisa["regiao"]
+    )
