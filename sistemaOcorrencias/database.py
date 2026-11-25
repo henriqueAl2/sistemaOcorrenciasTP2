@@ -1,15 +1,19 @@
 from contextlib import contextmanager
+import os
 from typing import Generator
 import mysql.connector
 from mysql.connector import Error
 from mysql.connector.connection import MySQLConnection
+from dotenv import load_dotenv
+
+load_dotenv()
 
 DB_CONFIG = {
-    "host": "localhost",
-    "port": 3306,
-    "user": "root",
-    "password": "SenhaForte123!",  
-    "database": "sistemaOcorrencias",
+    "host": os.getenv("ALERTADF_DB_HOST", "127.0.0.1"),
+    "port": int(os.getenv("ALERTADF_DB_PORT", "3306")),
+    "user": os.getenv("ALERTADF_DB_USER", "root"),
+    "password": os.getenv("ALERTADF_DB_PASSWORD", ""),
+    "database": os.getenv("ALERTADF_DB_NAME", "sistemaOcorrencias"),
     "charset": "utf8mb4",
     "collation": "utf8mb4_unicode_ci",
     "autocommit": False,

@@ -43,10 +43,10 @@ INSERT INTO tipoOcorrencia (idtipoOcorrencia, nome, descricao, Local_codigo) VAL
 (2, 'Iluminação pública', 'Poste apagado ou piscando', 102),
 (3, 'Descarte irregular', 'Acúmulo de lixo ou entulho', 103);
 
-INSERT INTO Ocorrencia (idOcorrencia, tipo, descricao, data, hora, status, Usuario_CPF, Local_codigo, acessada_admin) VALUES
-(1, 'Buraco na via', 'Buraco fundo na calçada', '2026-11-13', '2026-11-13 09:30:00', 'Aberta', '11122233344', 101, 0),
-(2, 'Iluminação pública', 'Poste totalmente apagado', '2026-11-13', '2026-11-13 10:15:00', 'Em análise', '55566677788', 102, 1),
-(3, 'Descarte irregular', 'Entulho bloqueando passagem', '2026-11-13', '2026-11-13 11:00:00', 'Aberta', '11122233344', 103, 0);
+INSERT INTO Ocorrencia (idOcorrencia, tipo, descricao, data, hora, status, Usuario_CPF, Local_codigo, tipoOcorrencia_idtipoOcorrencia, acessada_admin) VALUES
+(1, 'Buraco na via', 'Buraco fundo na calçada', '2026-11-13', '2026-11-13 09:30:00', 'Aberta', '11122233344', 101, 1, 0),
+(2, 'Iluminação pública', 'Poste totalmente apagado', '2026-11-13', '2026-11-13 10:15:00', 'Em análise', '55566677788', 102, 2, 1),
+(3, 'Descarte irregular', 'Entulho bloqueando passagem', '2026-11-13', '2026-11-13 11:00:00', 'Aberta', '11122233344', 103, 3, 0);
 
 INSERT INTO Acompanhamento (idAcompanhamento, dataInicio, Usuario_CPF) VALUES
 (1, '2026-11-13', '11122233344'),
