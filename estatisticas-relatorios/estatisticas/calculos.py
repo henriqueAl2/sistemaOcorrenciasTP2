@@ -129,3 +129,41 @@ def gerar_indicadores_gerais(ocorrencias):
         "resolvidas": resolvidas,
         "taxa_resolucao": taxa,
     }
+
+
+
+def contar_usuarios_por_perfil(usuarios):
+    """
+    Conta a quantidade de usuarios por perfil.
+
+    Args:
+        usuarios: Lista de dicionarios contendo
+                  o campo 'perfil'.
+
+    Returns:
+        Dicionario com a quantidade de usuarios
+        de cada perfil.
+    """
+    return _contar_por_chave(
+        usuarios,
+        lambda usuario: usuario["perfil"]
+    )
+
+
+def contar_usuarios_com_ocorrencias(ocorrencias):
+    """
+    Conta usuarios distintos que registraram ocorrencias.
+
+    Args:
+        ocorrencias: Lista de dicionarios contendo
+                     o campo 'usuario_id'.
+
+    Returns:
+        Quantidade de usuarios distintos.
+    """
+    usuarios_distintos = set()
+
+    for ocorrencia in ocorrencias:
+        usuarios_distintos.add(ocorrencia["usuario_id"])
+
+    return len(usuarios_distintos)
