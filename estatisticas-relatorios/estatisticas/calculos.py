@@ -1,3 +1,6 @@
+from datetime import date
+import re
+
 
 def calcular_taxa_resolucao(total, resolvidas):
     """
@@ -118,16 +121,62 @@ def contar_ocorrencias_por_tipo(ocorrencias):
     )
 
 
+
+def _validar_data(data):
+    """
+    Valida uma data no formato AAAA-MM-DD.
+
+    Args:
+        data: String contendo uma data.
+
+    Returns:
+        A propria data validada.
+
+    Raises:
+        TypeError: Se a data possuir tipo incorreto.
+        ValueError: Se a data for nula, inexistente
+                    ou possuir formato invalido.
+    """
+    if data is None:
+        raise ValueError(
+            "A data nao pode ser nula."
+        )
+
+    if not isinstance(data, str):
+        raise TypeError(
+            "A data deve ser uma string."
+        )
+
+    if not re.fullmatch(r"\d{4}-\d{2}-\d{2}", data):
+        raise ValueError(
+            "A data deve estar no formato AAAA-MM-DD."
+        )
+
+    try:
+        ano, mes, dia = map(int, data.split("-"))
+        date(ano, mes, dia)
+    except ValueError as erro:
+        raise ValueError(
+            "A data informada nao existe."
+        ) from erro
+
+    return data
+
+
+
 def contar_ocorrencias_por_dia(ocorrencias):
     """
     Conta ocorrencias por dia, em ordem cronologica.
     """
     contagem = _contar_por_chave(
         ocorrencias,
-        lambda ocorrencia: ocorrencia["data"]
+        lambda ocorrencia: _validar_data(
+            ocorrencia["data"]
+        )
     )
 
     return dict(sorted(contagem.items()))
+
 
 
 def contar_ocorrencias_por_mes(ocorrencias):
@@ -136,10 +185,13 @@ def contar_ocorrencias_por_mes(ocorrencias):
     """
     contagem = _contar_por_chave(
         ocorrencias,
-        lambda ocorrencia: ocorrencia["data"][:7]
+        lambda ocorrencia: _validar_data(
+            ocorrencia["data"]
+        )[:7]
     )
 
     return dict(sorted(contagem.items()))
+
 
 
 def contar_ocorrencias_por_regiao(ocorrencias):
