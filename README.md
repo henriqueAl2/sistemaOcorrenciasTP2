@@ -33,6 +33,14 @@ Aplicação Flask + MySQL para registro e consulta de ocorrências, com API para
 
 O servidor local escuta em `127.0.0.1:8000`. A aplicação não executa migrações nem scripts SQL automaticamente. `scriptTesteSistema.sql` apaga e recria dados; use-o somente em uma base descartável.
 
+## Executar os testes
+
+Instale as dependências de desenvolvimento com `pip install -r requirements-dev.txt`. Em seguida, a partir da pasta `sistemaOcorrencias`, execute:
+
+```sh
+python -m pytest -q teste_dominios.py
+```
+
 ## Rotas
 
 - `GET /api/occurrences` — lista ocorrências para o mapa com `id`, `type`, `description`, `date`, `latitude` e `longitude`. O `id` combina os dois campos da chave primária composta.
