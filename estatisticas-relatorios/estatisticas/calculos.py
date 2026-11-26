@@ -260,6 +260,7 @@ def contar_usuarios_por_perfil(usuarios):
     )
 
 
+
 def contar_usuarios_com_ocorrencias(ocorrencias):
     """
     Conta usuarios distintos que registraram ocorrencias.
@@ -270,11 +271,56 @@ def contar_usuarios_com_ocorrencias(ocorrencias):
 
     Returns:
         Quantidade de usuarios distintos.
+
+    Raises:
+        TypeError: Se a estrutura ou o tipo do
+                   identificador forem incorretos.
+        ValueError: Se o identificador estiver
+                    ausente ou possuir valor invalido.
     """
+    if not isinstance(ocorrencias, list):
+        raise TypeError(
+            "As ocorrencias devem ser uma lista."
+        )
+
     usuarios_distintos = set()
 
     for ocorrencia in ocorrencias:
-        usuarios_distintos.add(ocorrencia["usuario_id"])
+        if not isinstance(ocorrencia, dict):
+            raise TypeError(
+                "Cada ocorrencia deve ser um dicionario."
+            )
+
+        if "usuario_id" not in ocorrencia:
+            raise ValueError(
+                "O identificador do usuario esta ausente."
+            )
+
+        identificador = ocorrencia["usuario_id"]
+
+        if identificador is None:
+            raise ValueError(
+                "O identificador nao pode ser nulo."
+            )
+
+        if type(identificador) is int:
+            if identificador <= 0:
+                raise ValueError(
+                    "O identificador deve ser positivo."
+                )
+
+        elif isinstance(identificador, str):
+            if not identificador.strip():
+                raise ValueError(
+                    "O identificador nao pode estar vazio."
+                )
+
+        else:
+            raise TypeError(
+                "O identificador deve ser inteiro ou string."
+            )
+
+        usuarios_distintos.add(identificador)
 
     return len(usuarios_distintos)
 
