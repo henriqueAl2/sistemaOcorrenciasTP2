@@ -25,6 +25,23 @@ from markupsafe import Markup
 from mysql.connector import IntegrityError
 from werkzeug.security import check_password_hash
 
+if __package__:
+    from .estatisticas.calculos import (
+        contar_ocorrencias_por_mes,
+        contar_pesquisas_por_regiao,
+        contar_pesquisas_por_termo,
+        contar_usuarios_por_perfil,
+        gerar_indicadores_gerais,
+    )
+else:
+    from estatisticas.calculos import (
+        contar_ocorrencias_por_mes,
+        contar_pesquisas_por_regiao,
+        contar_pesquisas_por_termo,
+        contar_usuarios_por_perfil,
+        gerar_indicadores_gerais,
+    )
+
 
 admin_bp = Blueprint("admin", __name__, url_prefix="/admin")
 reports_bp = Blueprint("reports", __name__, url_prefix="/relatorios")
@@ -186,12 +203,37 @@ REPORTS_BODY = """
 </section>
 <div class="grid">
   <div class="stat"><strong>{{ total }}</strong><span>ocorrências encontradas</span></div>
+  <div class="stat"><strong>{{ indicators.taxa_resolucao|round(1) }}%</strong><span>taxa de resolução</span></div>
   <div class="stat"><strong>{{ total_searches }}</strong><span>pesquisas no período</span></div>
   <div class="stat"><strong>{{ total_users }}</strong><span>usuários cadastrados (total atual)</span></div>
   <div class="stat"><strong>{{ by_type|length }}</strong><span>tipos presentes</span></div>
   <div class="stat"><strong>{{ by_status|length }}</strong><span>status presentes</span></div>
   <div class="stat"><strong>{{ by_local|length }}</strong><span>locais presentes</span></div>
 </div>
+<section class="grid">
+  <div class="card"><h2>Ocorrências por mês</h2>{% if by_month %}
+    <div class="table-wrap"><table><thead><tr><th>Mês</th><th>Quantidade</th></tr></thead><tbody>
+      {% for row in by_month %}<tr><td>{{ row.mes }}</td><td>{{ row.total }}</td></tr>{% endfor %}
+    </tbody></table></div>{% else %}<p>Sem resultados.</p>{% endif %}
+  </div>
+  <div class="card"><h2>Usuários por perfil</h2>{% if by_profile %}
+    <div class="table-wrap"><table><thead><tr><th>Perfil</th><th>Quantidade</th></tr></thead><tbody>
+      {% for row in by_profile %}<tr><td>{{ row.rotulo }}</td><td>{{ row.total }}</td></tr>{% endfor %}
+    </tbody></table></div>{% else %}<p>Sem resultados.</p>{% endif %}
+  </div>
+</section>
+<section class="grid">
+  <div class="card"><h2>Pesquisas por termo</h2>{% if searches_by_term %}
+    <div class="table-wrap"><table><thead><tr><th>Termo</th><th>Quantidade</th></tr></thead><tbody>
+      {% for row in searches_by_term %}<tr><td>{{ row.rotulo }}</td><td>{{ row.total }}</td></tr>{% endfor %}
+    </tbody></table></div>{% else %}<p>Sem resultados.</p>{% endif %}
+  </div>
+  <div class="card"><h2>Pesquisas por região</h2>{% if searches_by_region %}
+    <div class="table-wrap"><table><thead><tr><th>Região</th><th>Quantidade</th></tr></thead><tbody>
+      {% for row in searches_by_region %}<tr><td>{{ row.rotulo }}</td><td>{{ row.total }}</td></tr>{% endfor %}
+    </tbody></table></div>{% else %}<p>Sem resultados.</p>{% endif %}
+  </div>
+</section>
 <section class="grid">
   <div class="card"><h2>Por tipo</h2>{% if by_type %}
     <div class="table-wrap"><table><thead><tr><th>Tipo</th><th>Quantidade</th></tr></thead><tbody>
@@ -224,7 +266,7 @@ REPORTS_BODY = """
     </tr>{% endfor %}</tbody>
   </table></div>{% else %}<p>Nenhuma ocorrência corresponde aos filtros.</p>{% endif %}
 </section>
-<p class="small">Ocorrências usam a relação com tipoOcorrencia. Pesquisas respeitam o intervalo pelas datas de dataHora; o total de usuários é o total atual, pois Usuario não possui data de cadastro.</p>
+<p class="small">Ocorrências usam a relação com tipoOcorrencia. A taxa de resolução considera o status “Resolvida”. Pesquisas respeitam o intervalo pelas datas de dataHora; o total de usuários é o total atual, pois Usuario não possui data de cadastro.</p>
 """
 
 
@@ -419,6 +461,16 @@ def _group(filters, select_sql, group_sql, order_sql):
 
 def _report_data(filters):
     rows = _occurrences(filters)
+    indicators = gerar_indicadores_gerais(
+        [{"status": (row["status"] or "").strip() or "Sem status"} for row in rows]
+    )
+    dated_occurrences = []
+    for row in rows:
+        occurrence_date = row["hora"].date() if row["hora"] else row["data"]
+        if occurrence_date:
+            dated_occurrences.append({"data": occurrence_date.isoformat()})
+    monthly_counts = contar_ocorrencias_por_mes(dated_occurrences)
+
     search_clauses, search_params = [], []
     if filters["start_date"]:
         search_clauses.append("DATE(p.dataHora) >= %s")
@@ -427,18 +479,45 @@ def _report_data(filters):
         search_clauses.append("DATE(p.dataHora) <= %s")
         search_params.append(filters["end_date"])
     search_where = " AND ".join(search_clauses) or "1=1"
-    total_searches = _fetch_one(
-        f"SELECT COUNT(*) AS total FROM pesquisa p WHERE {search_where}",
+    searches = _fetch_all(
+        f"SELECT p.termoPesquisado AS termo, p.regiaoConsultada AS regiao "
+        f"FROM pesquisa p WHERE {search_where}",
         tuple(search_params),
-    )["total"]
+    )
+    search_terms = contar_pesquisas_por_termo(
+        [{"termo": (row["termo"] or "").strip() or "Sem termo"} for row in searches]
+    )
+    search_regions = contar_pesquisas_por_regiao(
+        [{"regiao": (row["regiao"] or "").strip() or "Sem região"} for row in searches]
+    )
+    profiles = _fetch_all("SELECT tipo AS perfil FROM Usuario")
+    profile_counts = contar_usuarios_por_perfil(
+        [{"perfil": (row["perfil"] or "").strip() or "Sem perfil"} for row in profiles]
+    )
     return {
         "tipos": _fetch_all("SELECT idtipoOcorrencia AS id, nome FROM tipoOcorrencia ORDER BY nome, idtipoOcorrencia"),
         "locais": _fetch_all("SELECT codigo, endereco FROM Local ORDER BY codigo"),
         "statuses": _fetch_all("SELECT DISTINCT status FROM Ocorrencia WHERE status IS NOT NULL AND status <> '' ORDER BY status"),
         "ocorrencias": rows,
         "total": len(rows),
-        "total_searches": total_searches,
-        "total_users": _fetch_one("SELECT COUNT(*) AS total FROM Usuario")["total"],
+        "indicators": indicators,
+        "by_month": [
+            {"mes": month, "total": total} for month, total in monthly_counts.items()
+        ],
+        "total_searches": len(searches),
+        "searches_by_term": [
+            {"rotulo": label, "total": total}
+            for label, total in sorted(search_terms.items(), key=lambda item: (-item[1], item[0]))
+        ],
+        "searches_by_region": [
+            {"rotulo": label, "total": total}
+            for label, total in sorted(search_regions.items(), key=lambda item: (-item[1], item[0]))
+        ],
+        "total_users": len(profiles),
+        "by_profile": [
+            {"rotulo": label, "total": total}
+            for label, total in sorted(profile_counts.items(), key=lambda item: (-item[1], item[0]))
+        ],
         "by_type": _group(filters, "COALESCE(NULLIF(t.nome, ''), 'Sem tipo') AS rotulo", "t.idtipoOcorrencia, t.nome", "total DESC, rotulo"),
         "by_status": _group(filters, "COALESCE(NULLIF(o.status, ''), 'Sem status') AS rotulo", "o.status", "total DESC, rotulo"),
         "by_local": _group(filters, "l.codigo AS codigo, COALESCE(NULLIF(l.endereco, ''), 'Endereço não informado') AS rotulo", "l.codigo, l.endereco", "total DESC, l.codigo"),

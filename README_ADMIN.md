@@ -7,7 +7,7 @@ O módulo está integrado à aplicação Flask em `sistemaOcorrencias/admin_repo
 - Acesso administrativo local com senha armazenada como hash em variável de ambiente.
 - Cadastro, edição e exclusão segura de tipos de ocorrência.
 - Relatório de ocorrências filtrado por data, tipo, status e local.
-- Resumos por tipo, status e local, pesquisas no período, total atual de usuários e download CSV.
+- Resumos por tipo, status, local e mês; taxa de resolução; pesquisas por período, termo e região; usuários por perfil; download CSV.
 - Proteção CSRF nos formulários e consultas MySQL parametrizadas.
 - Validação dos nomes/descrições de tipos e do intervalo das datas conforme os domínios enviados pelo grupo.
 

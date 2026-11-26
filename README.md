@@ -38,7 +38,7 @@ O servidor local escuta em `127.0.0.1:8000`. A aplicação não executa migraç�
 - `GET /api/occurrences` — lista ocorrências para o mapa com `id`, `type`, `description`, `date`, `latitude` e `longitude`. O `id` combina os dois campos da chave primária composta.
 - `/login` — acesso administrativo local com hash guardado em `.env`.
 - `/admin/tipos` — cadastro, edição e exclusão de tipos de ocorrência.
-- `/relatorios` — filtros por período, tipo, status e local; resumos e exportação CSV.
+- `/relatorios` — filtros por período, tipo, status e local; resumos por tipo, status, local e mês; taxa de resolução; pesquisas por termo e região; usuários por perfil; exportação CSV.
 
 ## Relatórios e esquema
 
