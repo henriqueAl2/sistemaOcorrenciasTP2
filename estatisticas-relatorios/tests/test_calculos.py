@@ -589,3 +589,99 @@ def test_agrupamento_registro_nao_dicionario():
     with pytest.raises(TypeError):
         contar_ocorrencias_por_status(ocorrencias)
 
+
+
+# VALIDACAO DAS DATAS DAS OCORRENCIAS
+
+@pytest.mark.parametrize(
+    "funcao",
+    [
+        contar_ocorrencias_por_dia,
+        contar_ocorrencias_por_mes,
+    ],
+)
+@pytest.mark.parametrize(
+    "data_invalida",
+    [
+        "2026-02-30",
+        "2026-13-01",
+        "25/11/2026",
+        "2026-11",
+        "2026-11-25 10:30:00",
+        "2026-00-10",
+        "2026-11-00",
+        "2025-02-29",
+    ],
+)
+def test_contagem_data_invalida(funcao, data_invalida):
+    ocorrencias = [{"data": data_invalida}]
+
+    with pytest.raises(ValueError):
+        funcao(ocorrencias)
+
+
+@pytest.mark.parametrize(
+    "funcao",
+    [
+        contar_ocorrencias_por_dia,
+        contar_ocorrencias_por_mes,
+    ],
+)
+def test_contagem_data_nula(funcao):
+    with pytest.raises(ValueError):
+        funcao([{"data": None}])
+
+
+@pytest.mark.parametrize(
+    "funcao",
+    [
+        contar_ocorrencias_por_dia,
+        contar_ocorrencias_por_mes,
+    ],
+)
+def test_contagem_data_numerica(funcao):
+    with pytest.raises(TypeError):
+        funcao([{"data": 20261125}])
+
+
+@pytest.mark.parametrize(
+    "funcao",
+    [
+        contar_ocorrencias_por_dia,
+        contar_ocorrencias_por_mes,
+    ],
+)
+def test_contagem_data_ausente(funcao):
+    with pytest.raises(ValueError):
+        funcao([{}])
+
+
+
+def test_contagem_dia_ano_bissexto():
+    ocorrencias = [
+        {"data": "2024-02-29"},
+        {"data": "2024-02-29"},
+        {"data": "2024-03-01"},
+    ]
+
+    resultado = contar_ocorrencias_por_dia(ocorrencias)
+
+    assert resultado == {
+        "2024-02-29": 2,
+        "2024-03-01": 1,
+    }
+
+
+def test_contagem_mes_ano_bissexto():
+    ocorrencias = [
+        {"data": "2024-02-28"},
+        {"data": "2024-02-29"},
+        {"data": "2024-03-01"},
+    ]
+
+    resultado = contar_ocorrencias_por_mes(ocorrencias)
+
+    assert resultado == {
+        "2024-02": 2,
+        "2024-03": 1,
+    }
