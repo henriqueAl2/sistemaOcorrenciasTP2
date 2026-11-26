@@ -685,3 +685,90 @@ def test_contagem_mes_ano_bissexto():
         "2024-02": 2,
         "2024-03": 1,
     }
+
+
+
+# VALIDACAO DOS IDENTIFICADORES DE USUARIOS
+
+def test_usuarios_identificadores_textuais():
+    ocorrencias = [
+        {"usuario_id": "00000000000"},
+        {"usuario_id": "11122233344"},
+        {"usuario_id": "00000000000"},
+    ]
+
+    assert contar_usuarios_com_ocorrencias(ocorrencias) == 2
+
+
+def test_usuarios_identificadores_numericos():
+    ocorrencias = [
+        {"usuario_id": 1},
+        {"usuario_id": 2},
+        {"usuario_id": 1},
+    ]
+
+    assert contar_usuarios_com_ocorrencias(ocorrencias) == 2
+
+
+@pytest.mark.parametrize(
+    "identificador",
+    [None, "", "   ", 0, -1],
+)
+def test_usuario_identificador_valor_invalido(identificador):
+    ocorrencias = [{"usuario_id": identificador}]
+
+    with pytest.raises(ValueError):
+        contar_usuarios_com_ocorrencias(ocorrencias)
+
+
+@pytest.mark.parametrize(
+    "identificador",
+    [True, 2.5, []],
+)
+def test_usuario_identificador_tipo_invalido(identificador):
+    ocorrencias = [{"usuario_id": identificador}]
+
+    with pytest.raises(TypeError):
+        contar_usuarios_com_ocorrencias(ocorrencias)
+
+
+@pytest.mark.parametrize(
+    "entrada",
+    [None, {}, "texto"],
+)
+def test_usuarios_ocorrencias_entrada_invalida(entrada):
+    with pytest.raises(TypeError):
+        contar_usuarios_com_ocorrencias(entrada)
+
+
+def test_usuario_identificador_ausente():
+    with pytest.raises(ValueError):
+        contar_usuarios_com_ocorrencias([{}])
+
+
+def test_usuario_registro_nao_dicionario():
+    with pytest.raises(TypeError):
+        contar_usuarios_com_ocorrencias(["registro invalido"])
+
+
+# CONSISTENCIA DAS PESQUISAS
+
+def test_pesquisas_rejeita_lista_com_termo_invalido():
+    pesquisas = [
+        {"termo": "Buraco na via"},
+        {"termo": None},
+    ]
+
+    with pytest.raises(ValueError):
+        contar_pesquisas_por_termo(pesquisas)
+
+
+def test_pesquisas_rejeita_lista_com_regiao_ausente():
+    pesquisas = [
+        {"regiao": "Asa Norte"},
+        {},
+    ]
+
+    with pytest.raises(ValueError):
+        contar_pesquisas_por_regiao(pesquisas)
+
