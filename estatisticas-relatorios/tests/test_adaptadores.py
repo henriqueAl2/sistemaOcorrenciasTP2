@@ -1,6 +1,9 @@
 import pytest
-from estatisticas.adaptadores import adaptar_ocorrencias
-
+from estatisticas.adaptadores import (
+    adaptar_ocorrencias,
+    adaptar_usuarios,
+    adaptar_pesquisas,
+)
 
 def test_adaptar_ocorrencias():
     dados = [
@@ -54,3 +57,83 @@ def test_adaptar_campo_ausente():
 
     with pytest.raises(ValueError):
         adaptar_ocorrencias(dados)
+
+
+
+# TESTES DO ADAPTADOR DE USUARIOS
+
+def test_adaptar_usuarios():
+    dados = [
+        {"CPF": "00123456789", "tipo": "user"},
+        {"CPF": "98765432100", "tipo": "admin"},
+    ]
+
+    resultado = adaptar_usuarios(dados)
+
+    assert resultado == [
+        {"id": "00123456789", "perfil": "user"},
+        {"id": "98765432100", "perfil": "admin"},
+    ]
+
+
+def test_adaptar_usuarios_lista_vazia():
+    assert adaptar_usuarios([]) == []
+
+
+def test_adaptar_usuario_campo_ausente():
+    dados = [{"CPF": "00123456789"}]
+
+    with pytest.raises(ValueError):
+        adaptar_usuarios(dados)
+
+
+def test_adaptar_usuario_cpf_invalido():
+    dados = [{"CPF": None, "tipo": "user"}]
+
+    with pytest.raises(ValueError):
+        adaptar_usuarios(dados)
+
+
+# TESTES DO ADAPTADOR DE PESQUISAS
+
+def test_adaptar_pesquisas():
+    dados = [
+        {
+            "termoPesquisado": "Buraco",
+            "regiaoConsultada": "Asa Norte",
+        },
+        {
+            "termoPesquisado": "Iluminacao",
+            "regiaoConsultada": "Asa Sul",
+        },
+    ]
+
+    resultado = adaptar_pesquisas(dados)
+
+    assert resultado == [
+        {"termo": "Buraco", "regiao": "Asa Norte"},
+        {"termo": "Iluminacao", "regiao": "Asa Sul"},
+    ]
+
+
+def test_adaptar_pesquisas_lista_vazia():
+    assert adaptar_pesquisas([]) == []
+
+
+def test_adaptar_pesquisa_campo_ausente():
+    dados = [{"termoPesquisado": "Buraco"}]
+
+    with pytest.raises(ValueError):
+        adaptar_pesquisas(dados)
+
+
+def test_adaptar_pesquisa_regiao_nula():
+    dados = [
+        {
+            "termoPesquisado": "Buraco",
+            "regiaoConsultada": None,
+        }
+    ]
+
+    with pytest.raises(ValueError):
+        adaptar_pesquisas(dados)
