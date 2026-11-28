@@ -13,6 +13,17 @@ O módulo está integrado à aplicação Flask em `sistemaOcorrencias/admin_repo
 
 Siga as instruções de configuração e inicialização no `README.md`. O painel usa as rotas `/login`, `/admin/tipos` e `/relatorios` no mesmo servidor da API.
 
+## Endpoints JSON
+
+Os endpoints administrativos usam a sessão criada em `/login`. Sem uma sessão de administrador, retornam HTTP 401 em JSON. Filtros inválidos retornam HTTP 400; falhas no banco retornam HTTP 503.
+
+- `GET /api/statistics/overview` retorna totais e agrupamentos de ocorrências, pesquisas e usuários.
+- `GET /api/reports/occurrences` retorna as ocorrências filtradas sem CPF ou outros identificadores de usuário.
+
+Ambos aceitam os filtros opcionais `start_date`, `end_date` (`AAAA-MM-DD`), `tipo` (ID do tipo), `status` e `local` (código do local). Exemplo: `/api/reports/occurrences?start_date=2026-11-01&tipo=2&local=101`.
+
+O relatório agrupa pesquisas por `pesquisa.regiaoConsultada`, que já existe no esquema. As ocorrências são agrupadas por local; não há uma região da ocorrência no banco até o grupo definir como representá-la.
+
 ## Como o protótipo usa o esquema atual
 
 - `tipoOcorrencia.Local_codigo` é obrigatório, por isso cada tipo precisa de um local.

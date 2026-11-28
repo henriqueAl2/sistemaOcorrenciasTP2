@@ -38,7 +38,7 @@ O servidor local escuta em `127.0.0.1:8000`. A aplicação não executa migraç�
 Instale as dependências de desenvolvimento com `pip install -r requirements-dev.txt`. Em seguida, a partir da pasta `sistemaOcorrencias`, execute:
 
 ```sh
-python -m pytest -q teste_dominios.py teste_entidades.py
+python -m pytest -q teste_dominios.py teste_entidades.py teste_api_relatorios.py
 ```
 
 ## Rotas

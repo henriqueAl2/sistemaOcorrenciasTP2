@@ -18,7 +18,7 @@ from urllib.parse import urlparse
 import mysql.connector
 from dotenv import load_dotenv
 from flask import (
-    Flask, Blueprint, abort, current_app, flash, make_response, redirect,
+    Flask, Blueprint, abort, current_app, flash, jsonify, make_response, redirect,
     render_template_string, request, session, url_for,
 )
 from markupsafe import Markup
@@ -45,6 +45,7 @@ else:
 
 admin_bp = Blueprint("admin", __name__, url_prefix="/admin")
 reports_bp = Blueprint("reports", __name__, url_prefix="/relatorios")
+api_reports_bp = Blueprint("api_reports", __name__, url_prefix="/api")
 
 
 PAGE = """
@@ -340,6 +341,16 @@ def _admin_only(view):
     return wrapped
 
 
+def _api_admin_only(view):
+    """Require an administrative session and return JSON for API clients."""
+    @wraps(view)
+    def wrapped(*args, **kwargs):
+        if not session.get("is_admin"):
+            return jsonify({"erro": "Autenticação administrativa necessária."}), 401
+        return view(*args, **kwargs)
+    return wrapped
+
+
 def _require_csrf():
     if not _valid_csrf():
         abort(400, description="Formulário expirado. Atualize a página e tente novamente.")
@@ -410,6 +421,37 @@ def _filters():
             flash("Selecione um tipo de ocorrência válido.", "error")
             values["tipo"] = ""
     return values
+
+
+def _api_filters():
+    """Parse and strictly validate report filters for JSON endpoints."""
+    values = {
+        "start_date": (request.args.get("start_date") or "").strip(),
+        "end_date": (request.args.get("end_date") or "").strip(),
+        "tipo": (request.args.get("tipo") or "").strip(),
+        "status": (request.args.get("status") or "").strip(),
+        "local": (request.args.get("local") or "").strip(),
+    }
+    for key in ("start_date", "end_date"):
+        if values[key]:
+            try:
+                parsed_date = date.fromisoformat(values[key])
+            except ValueError:
+                return None, "Informe datas no formato AAAA-MM-DD."
+            if not 2026 <= parsed_date.year <= 2999:
+                return None, "As datas devem estar entre 2026 e 2999."
+    if values["start_date"] and values["end_date"] and values["start_date"] > values["end_date"]:
+        return None, "A data inicial deve ser anterior ou igual à data final."
+    for key, label in (("tipo", "tipo"), ("local", "local")):
+        if values[key]:
+            try:
+                if int(values[key]) <= 0:
+                    raise ValueError
+            except ValueError:
+                return None, f"Informe um identificador de {label} válido."
+    if len(values["status"]) > 45:
+        return None, "O status pode ter até 45 caracteres."
+    return values, None
 
 
 def _where(filters):
@@ -523,6 +565,109 @@ def _report_data(filters):
         "by_local": _group(filters, "l.codigo AS codigo, COALESCE(NULLIF(l.endereco, ''), 'Endereço não informado') AS rotulo", "l.codigo, l.endereco", "total DESC, l.codigo"),
         "filters": filters,
     }
+
+
+@api_reports_bp.get("/statistics/overview")
+@_api_admin_only
+def api_statistics_overview():
+    """Return the report dashboard aggregates as a JSON API response."""
+    filters, error = _api_filters()
+    if error:
+        return jsonify({"erro": error}), 400
+    try:
+        data = _report_data(filters)
+    except (mysql.connector.Error, ConnectionError):
+        current_app.logger.exception("Falha ao consultar as estatísticas.")
+        return jsonify({"erro": "Falha ao consultar o banco de dados."}), 503
+
+    return jsonify({
+        "filters": {
+            "start_date": filters["start_date"] or None,
+            "end_date": filters["end_date"] or None,
+            "type_id": int(filters["tipo"]) if filters["tipo"] else None,
+            "status": filters["status"] or None,
+            "location_id": int(filters["local"]) if filters["local"] else None,
+        },
+        "occurrences": {
+            "total": data["total"],
+            "resolved": data["indicators"]["resolvidas"],
+            "resolution_rate": data["indicators"]["taxa_resolucao"],
+            "by_month": [
+                {"month": row["mes"], "total": row["total"]}
+                for row in data["by_month"]
+            ],
+            "by_type": [
+                {"label": row["rotulo"], "total": row["total"]}
+                for row in data["by_type"]
+            ],
+            "by_status": [
+                {"label": row["rotulo"], "total": row["total"]}
+                for row in data["by_status"]
+            ],
+            "by_location": [
+                {"id": row["codigo"], "label": row["rotulo"], "total": row["total"]}
+                for row in data["by_local"]
+            ],
+        },
+        "searches": {
+            "total": data["total_searches"],
+            "by_term": [
+                {"label": row["rotulo"], "total": row["total"]}
+                for row in data["searches_by_term"]
+            ],
+            "by_region": [
+                {"label": row["rotulo"], "total": row["total"]}
+                for row in data["searches_by_region"]
+            ],
+        },
+        "users": {
+            "total": data["total_users"],
+            "by_profile": [
+                {"label": row["rotulo"], "total": row["total"]}
+                for row in data["by_profile"]
+            ],
+        },
+    })
+
+
+@api_reports_bp.get("/reports/occurrences")
+@_api_admin_only
+def api_report_occurrences():
+    """Return filtered occurrence records without user-identifying fields."""
+    filters, error = _api_filters()
+    if error:
+        return jsonify({"erro": error}), 400
+    try:
+        rows = _occurrences(filters)
+    except (mysql.connector.Error, ConnectionError):
+        current_app.logger.exception("Falha ao consultar o relatório de ocorrências.")
+        return jsonify({"erro": "Falha ao consultar o banco de dados."}), 503
+
+    items = []
+    for row in rows:
+        occurrence_date = row["hora"] or row["data"]
+        items.append({
+            "id": row["id"],
+            "type": row["tipo"],
+            "description": row["descricao"],
+            "date": occurrence_date.isoformat() if occurrence_date else None,
+            "status": row["status"],
+            "location": {
+                "id": row["local_codigo"],
+                "address": row["endereco"],
+            },
+        })
+    return jsonify({
+        "filters": {
+            "start_date": filters["start_date"] or None,
+            "end_date": filters["end_date"] or None,
+            "type_id": int(filters["tipo"]) if filters["tipo"] else None,
+            "status": filters["status"] or None,
+            "location_id": int(filters["local"]) if filters["local"] else None,
+        },
+        "total": len(items),
+        "occurrences": items,
+    })
 
 
 @admin_bp.get("/tipos")
@@ -682,7 +827,8 @@ def export_csv():
 
 def register_admin_reports(app, *, register_home=True):
     """Register admin and report routes on the group's existing Flask app."""
-    app.config.setdefault("SECRET_KEY", os.getenv("ALERTADF_SECRET_KEY") or secrets.token_hex(32))
+    if not app.config.get("SECRET_KEY"):
+        app.config["SECRET_KEY"] = os.getenv("ALERTADF_SECRET_KEY") or secrets.token_hex(32)
     app.config.setdefault("ADMIN_PASSWORD_HASH", os.getenv("ALERTADF_ADMIN_PASSWORD_HASH", ""))
     app.config.setdefault("DB_HOST", os.getenv("ALERTADF_DB_HOST", "127.0.0.1"))
     app.config.setdefault("DB_PORT", int(os.getenv("ALERTADF_DB_PORT", "3306")))
@@ -694,6 +840,7 @@ def register_admin_reports(app, *, register_home=True):
     app.jinja_env.globals["csrf_token"] = _csrf_token
     app.register_blueprint(admin_bp)
     app.register_blueprint(reports_bp)
+    app.register_blueprint(api_reports_bp)
 
     if register_home:
         @app.get("/")
