@@ -1,4 +1,6 @@
 """Módulo de implementação das entidades do sistema de ocorrências."""
+from __future__ import annotations
+
 from dominios import (
     CPF,
     Data,
